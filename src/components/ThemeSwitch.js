@@ -2,7 +2,7 @@ import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 
 const ThemeSwitch = () => {
-  const { theme, toggleTheme } = useTheme(); // Vérifie que useTheme() retourne bien { theme, toggleTheme }
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="flex items-center justify-center my-4">

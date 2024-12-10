@@ -22,7 +22,7 @@ const App = () => {
 
       if (response.status === 200) {
         localStorage.setItem('token', response.data.token);
-        navigate('/backoffice');
+        navigate('/dashboard');
       }
     } catch (error) {
       setErrorMessage(error.response?.data?.message || 'Erreur de connexion');
