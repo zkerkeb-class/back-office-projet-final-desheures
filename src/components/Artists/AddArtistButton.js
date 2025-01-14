@@ -1,6 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const AddArtistButton = ({ handleAddArtist }) => {
+const AddArtistButton = () => {
+  const navigate = useNavigate();
+
+  const handleAddArtist = () => {
+    navigate('/artists/create');
+  };
+
   return (
     <button
       onClick={handleAddArtist}

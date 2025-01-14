@@ -29,10 +29,10 @@ const Header = () => {
             Albums
           </Link>
           <Link
-            to="/media"
+            to="/audio"
             className="text-white hover:bg-[#A238FF] px-4 py-2 rounded-md"
           >
-            Médias
+            Audio
           </Link>
           <Link
             to="/settings"
