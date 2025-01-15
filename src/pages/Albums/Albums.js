@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useTheme } from '../../context/ThemeContext';
-import Header from '../../components/Partial/Header';
-import SearchBar from '../../components/Partial/SearchBar';
-import AlbumsList from '../../components/Albums/AlbumsList';
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect } from 'react';
+import Layout from '../../components/layout/Layout/Layout';
+import AlbumsList from '../../components/features/Albums/AlbumsList/AlbumsList';
+import SearchBar from '../../components/common/SearchBar/SearchBar';
+import Button from '../../components/common/Button/Button';
+import { useNavigate } from 'react-router-dom';
+import { albumsApi } from '../../services/api';
 
 const Albums = () => {
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const { theme } = useTheme();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAlbums = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BACKEND_URL}/album`
-        );
+        const response = await albumsApi.getAll();
         setAlbums(response.data);
-        setLoading(false);
       } catch (err) {
-        setError('Impossible de charger les albums. Veuillez réessayer.');
+        setError('Impossible de charger les albums');
+      } finally {
         setLoading(false);
       }
     };
@@ -29,42 +29,31 @@ const Albums = () => {
     fetchAlbums();
   }, []);
 
-  const handleSearchChange = (e) => {
-    setSearch(e.target.value);
+  const handleDelete = async (id) => {
+    try {
+      await albumsApi.delete(id);
+      setAlbums(albums.filter((album) => album._id !== id));
+    } catch (err) {
+      setError('Erreur lors de la suppression');
+    }
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Chargement...
-      </div>
-    );
-  if (error)
-    return (
-      <div className="flex justify-center items-center h-screen text-red-500">
-        {error}
-      </div>
-    );
-
   return (
-    <div className="flex">
-      <Header />
-      <div
-        className={`flex-grow p-6 ${theme === 'dark' ? 'bg-[#111827]' : 'bg-white'} text-gray-800 dark:text-gray-200`}
-        style={{ marginLeft: '16rem' }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h1
-            className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-[#29282D]'}`}
-          >
-            Liste des albums
-          </h1>
-          <SearchBar search={search} handleSearchChange={handleSearchChange} />
+    <Layout>
+      <div className="mb-6 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Liste des albums</h1>
+        <div className="flex gap-4">
+          <SearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <Button onClick={() => navigate('/albums/create')}>
+            Ajouter un album
+          </Button>
         </div>
-
-        <AlbumsList albums={albums} search={search} />
       </div>
-    </div>
+      <AlbumsList albums={albums} search={search} onDelete={handleDelete} />
+    </Layout>
   );
 };
 
