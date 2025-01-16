@@ -50,7 +50,7 @@ const Artists = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <Button onClick={() => navigate('/artists/create')}>
+          <Button onClick={() => navigate('/artist/create')}>
             Ajouter un artiste
           </Button>
         </div>

@@ -17,7 +17,6 @@ const CreateArtist = () => {
     genres: [],
     bio: '',
     imageUrl: '',
-    popularity: 0,
   });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -139,19 +138,6 @@ const CreateArtist = () => {
             value={formData.imageUrl}
             onChange={handleChange}
           />
-
-          <div className="w-1/3">
-            <InputField
-              id="popularity"
-              name="popularity"
-              label="Popularité"
-              type="number"
-              min="0"
-              max="100"
-              value={formData.popularity}
-              onChange={handleChange}
-            />
-          </div>
 
           <div className="flex justify-end gap-4 pt-6">
             <Button

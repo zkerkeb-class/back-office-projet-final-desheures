@@ -8,6 +8,7 @@ import CreateArtist from '../pages/Artists/CreateArtist';
 import UpdateArtist from '../pages/Artists/UpdateArtist';
 import Albums from '../pages/Albums/Albums';
 import Audio from '../pages/Audio/Audio';
+import UpdateAudio from '../pages/Audio/UpdateAudio';
 
 const AppRoutes = () => {
   return (
@@ -18,10 +19,11 @@ const AppRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/artists" element={<Artists />} />
-        <Route path="/artists/create" element={<CreateArtist />} />
+        <Route path="/artist/create" element={<CreateArtist />} />
         <Route path="/artist/update/:id" element={<UpdateArtist />} />
         <Route path="/albums" element={<Albums />} />
         <Route path="/audio" element={<Audio />} />
+        <Route path="/audio/update/:id" element={<UpdateAudio />} />
       </Route>
 
       <Route
