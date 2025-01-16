@@ -5,7 +5,7 @@ import AlbumsList from '../../components/features/Albums/AlbumsList/AlbumsList';
 import SearchBar from '../../components/common/SearchBar/SearchBar';
 import Button from '../../components/common/Button/Button';
 import { useNavigate } from 'react-router-dom';
-import { albumsApi } from '../../services/api';
+import { albumApi } from '../../services/api';
 
 const Albums = () => {
   const [albums, setAlbums] = useState([]);
@@ -17,7 +17,7 @@ const Albums = () => {
   useEffect(() => {
     const fetchAlbums = async () => {
       try {
-        const response = await albumsApi.getAll();
+        const response = await albumApi.getAll();
         setAlbums(response.data);
       } catch (err) {
         setError('Impossible de charger les albums');
@@ -31,7 +31,7 @@ const Albums = () => {
 
   const handleDelete = async (id) => {
     try {
-      await albumsApi.delete(id);
+      await albumApi.delete(id);
       setAlbums(albums.filter((album) => album._id !== id));
     } catch (err) {
       setError('Erreur lors de la suppression');

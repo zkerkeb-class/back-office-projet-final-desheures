@@ -28,7 +28,7 @@ api.interceptors.response.use(
   }
 );
 
-export const artistsApi = {
+export const artistApi = {
   getAll: () => api.get('/artist'),
   getById: (id) => api.get(`/artist/${id}`),
   create: (data) => api.post('/artist', data),
@@ -36,7 +36,7 @@ export const artistsApi = {
   delete: (id) => api.delete(`/artist/${id}`),
 };
 
-export const albumsApi = {
+export const albumApi = {
   getAll: () => api.get('/album'),
   getById: (id) => api.get(`/album/${id}`),
   create: (data) => api.post('/album', data),

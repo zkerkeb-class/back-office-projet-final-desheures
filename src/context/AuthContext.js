@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
+import { useToken } from './TokenContext';
 
 const AuthContext = createContext(null);
 
@@ -10,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { updateToken, clearToken } = useToken();
 
   const login = async (email, password) => {
     setLoading(true);
@@ -17,6 +19,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authService.login(email, password);
       setUser(data.user);
+      updateToken(data.token);
       return data;
     } catch (err) {
       setError(err.message);
@@ -29,6 +32,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     authService.logout();
     setUser(null);
+    clearToken();
     navigate('/login');
   };
 

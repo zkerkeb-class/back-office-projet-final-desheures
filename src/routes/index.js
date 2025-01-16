@@ -5,6 +5,7 @@ import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
 import Artists from '../pages/Artists/Artists';
 import CreateArtist from '../pages/Artists/CreateArtist';
+import UpdateArtist from '../pages/Artists/UpdateArtist';
 import Albums from '../pages/Albums/Albums';
 import Audio from '../pages/Audio/Audio';
 
@@ -18,6 +19,7 @@ const AppRoutes = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/artists" element={<Artists />} />
         <Route path="/artists/create" element={<CreateArtist />} />
+        <Route path="/artist/update/:id" element={<UpdateArtist />} />
         <Route path="/albums" element={<Albums />} />
         <Route path="/audio" element={<Audio />} />
       </Route>

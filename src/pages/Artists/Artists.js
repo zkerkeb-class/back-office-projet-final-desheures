@@ -5,7 +5,7 @@ import ArtistsList from '../../components/features/Artists/ArtistsList/ArtistsLi
 import SearchBar from '../../components/common/SearchBar/SearchBar';
 import Button from '../../components/common/Button/Button';
 import { useNavigate } from 'react-router-dom';
-import { artistsApi } from '../../services/api';
+import { artistApi } from '../../services/api';
 import { logError } from '../../utils/logger';
 
 const Artists = () => {
@@ -18,7 +18,7 @@ const Artists = () => {
   useEffect(() => {
     const fetchArtists = async () => {
       try {
-        const response = await artistsApi.getAll();
+        const response = await artistApi.getAll();
         setArtists(response.data);
       } catch (err) {
         setError('Impossible de charger les artistes');
@@ -33,7 +33,7 @@ const Artists = () => {
 
   const handleDelete = async (id) => {
     try {
-      await artistsApi.delete(id);
+      await artistApi.delete(id);
       setArtists(artists.filter((artist) => artist._id !== id));
     } catch (err) {
       logError(err);

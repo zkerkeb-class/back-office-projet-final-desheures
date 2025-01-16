@@ -16,7 +16,7 @@ const ArtistCard = ({ artist, onDelete }) => {
           {artist.bio || 'Aucune biographie disponible'}
         </p>
         <div className="flex justify-end space-x-2">
-          <Link to={`/artists/edit/${artist._id}`}>
+          <Link to={`/artist/update/${artist._id}`}>
             <Button variant="secondary">Modifier</Button>
           </Link>
           <Button variant="danger" onClick={() => onDelete(artist._id)}>

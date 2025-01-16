@@ -1,6 +1,7 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable comma-dangle */
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../../components/layout/Layout/Layout';
 import InputField from '../../components/common/InputField/InputField';
 import Button from '../../components/common/Button/Button';
@@ -8,9 +9,10 @@ import { useToken } from '../../context/TokenContext';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-const CreateArtist = () => {
+const UpdateArtist = () => {
   const navigate = useNavigate();
   const { token } = useToken();
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     name: '',
     namePhonetic: '',
@@ -21,6 +23,41 @@ const CreateArtist = () => {
   });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchArtist = async () => {
+      try {
+        const response = await fetch(`${API_URL}/artist/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Erreur lors de la récupération de l'artiste"
+          );
+        }
+
+        const artist = await response.json();
+        setFormData({
+          name: artist.name,
+          namePhonetic: artist.namePhonetic,
+          genres: artist.genres,
+          bio: artist.bio,
+          imageUrl: artist.imageUrl,
+          popularity: artist.popularity,
+        });
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchArtist();
+  }, [id, token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,8 +81,8 @@ const CreateArtist = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/artist`, {
-        method: 'POST',
+      const response = await fetch(`${API_URL}/artist/${id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -59,7 +96,7 @@ const CreateArtist = () => {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || "Erreur lors de la création de l'artiste"
+          errorData.message || "Erreur lors de la mise à jour de l'artiste"
         );
       }
 
@@ -76,7 +113,7 @@ const CreateArtist = () => {
       <div className="bg-[#29282D] rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-white">
-            Créer un nouvel artiste
+            Mettre à jour l'artiste
           </h1>
           <Button variant="secondary" onClick={() => navigate('/artists')}>
             Retour
@@ -162,7 +199,7 @@ const CreateArtist = () => {
               Annuler
             </Button>
             <Button type="submit" variant="primary" disabled={isLoading}>
-              {isLoading ? 'Création...' : "Créer l'artiste"}
+              {isLoading ? 'Mise à jour...' : "Mettre à jour l'artiste"}
             </Button>
           </div>
         </form>
@@ -171,4 +208,4 @@ const CreateArtist = () => {
   );
 };
 
-export default CreateArtist;
+export default UpdateArtist;
