@@ -3,10 +3,21 @@ import { Link } from 'react-router-dom';
 import Button from '../../../common/Button/Button';
 
 const ArtistCard = ({ artist, onDelete }) => {
+  const API_URL = process.env.REACT_APP_BACKEND_IMAGE;
+
+  const getImageUrl = (url) => {
+    // Si l'URL est absolue (commence par "http"), retourne-la telle quelle
+    if (url?.startsWith('http')) {
+      return url;
+    }
+    // Sinon, ajoute l'URL de ton API locale
+    return `${API_URL}${url}`;
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       <img
-        src={artist.imageUrl || '/default-artist.png'}
+        src={getImageUrl(artist.imageUrl) || 'uploads/images/default_cover.jpg'}
         alt={artist.name}
         className="w-full h-48 object-cover"
       />
