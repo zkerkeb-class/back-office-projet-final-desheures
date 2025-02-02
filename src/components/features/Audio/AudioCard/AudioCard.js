@@ -18,7 +18,7 @@ const AudioCard = ({ audio, onDelete }) => {
           Durée: {formatDuration(audio.duration)}
         </p>
         <div className="flex justify-end space-x-2">
-          <Link to={`/audio/edit/${audio._id}`}>
+          <Link to={`/audio/update/${audio._id}`}>
             <Button variant="secondary">Modifier</Button>
           </Link>
           <Button variant="danger" onClick={() => onDelete(audio._id)}>

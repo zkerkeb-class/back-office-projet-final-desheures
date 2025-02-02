@@ -17,11 +17,9 @@ const AlbumCard = ({ album, onDelete }) => {
   const API_URL = process.env.REACT_APP_BACKEND_IMAGE;
 
   const getImageUrl = (url) => {
-    // Si l'URL est absolue (commence par "http"), retourne-la telle quelle
     if (url?.startsWith('http')) {
       return url;
     }
-    // Sinon, ajoute l'URL de ton API locale
     return `${API_URL}${url}`;
   };
 
@@ -33,7 +31,11 @@ const AlbumCard = ({ album, onDelete }) => {
         className="w-full h-48 object-cover"
       />
       <div className="p-4">
-        <h3 className="text-xl font-bold mb-2 text-white">{album.title}</h3>
+        <h3 className="text-xl font-bold mb-2 text-white">
+          <Link to={`/albums/update/${album._id}`} className="hover:underline">
+            {album.title}
+          </Link>
+        </h3>
         <p className="text-gray-600 dark:text-gray-400 mb-2">
           Artiste: {album.artist?.name || 'Inconnu'}
         </p>
@@ -41,7 +43,7 @@ const AlbumCard = ({ album, onDelete }) => {
           Année: {formatDate(album.releaseDate)}
         </p>
         <div className="flex justify-end space-x-2">
-          <Link to={`/albums/edit/${album._id}`}>
+          <Link to={`/albums/update/${album._id}`}>
             <Button variant="secondary">Modifier</Button>
           </Link>
           <Button variant="danger" onClick={() => onDelete(album._id)}>

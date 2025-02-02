@@ -6,11 +6,9 @@ const ArtistCard = ({ artist, onDelete }) => {
   const API_URL = process.env.REACT_APP_BACKEND_IMAGE;
 
   const getImageUrl = (url) => {
-    // Si l'URL est absolue (commence par "http"), retourne-la telle quelle
     if (url?.startsWith('http')) {
       return url;
     }
-    // Sinon, ajoute l'URL de ton API locale
     return `${API_URL}${url}`;
   };
 

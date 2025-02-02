@@ -1,15 +1,18 @@
+/* eslint-disable indent */
 import React from 'react';
 import AudioCard from '../AudioCard/AudioCard';
 
-const AudioList = ({ audios, search, onDelete }) => {
-  const filteredAudios = audios.filter(
-    (audio) =>
-      audio.title.toLowerCase().includes(search.toLowerCase()) ||
-      audio.artist.name.toLowerCase().includes(search.toLowerCase()) ||
-      audio.album.title.toLowerCase().includes(search.toLowerCase())
-  );
+const AudioList = ({ audios, search = '', onDelete }) => {
+  const filteredAudios = search
+    ? audios.filter(
+        (audio) =>
+          audio.title.toLowerCase().includes(search.toLowerCase()) ||
+          audio.artist?.name?.toLowerCase().includes(search.toLowerCase()) ||
+          audio.album?.title?.toLowerCase().includes(search.toLowerCase())
+      )
+    : audios;
 
-  if (!filteredAudios.length) {
+  if (filteredAudios.length === 0) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400 py-8">
         Aucun audio ne correspond à votre recherche.

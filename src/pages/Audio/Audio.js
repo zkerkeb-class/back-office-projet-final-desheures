@@ -1,102 +1,185 @@
-/* eslint-disable no-undef */
 /* eslint-disable comma-dangle */
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/layout/Layout/Layout';
 import AudioList from '../../components/features/Audio/AudioList/AudioList';
-import FilterPanel from '../../components/common/Filters/FilterPanel';
+import SearchBar from '../../components/common/SearchBar/SearchBar';
+import Button from '../../components/common/Button/Button';
+import { useNavigate } from 'react-router-dom';
 import { audioApi } from '../../services/api';
-import { filterService } from '../../services/filter';
 
 const Audio = () => {
   const [audios, setAudios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState({
-    artists: [],
-    albums: [],
-    genres: [],
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState({
+    album: '',
+    artist: '',
+    genre: '',
+    year: '',
+    duration: '',
   });
-
-  const sortOptions = [
-    { value: 'duration', label: 'Durée' },
-    { value: 'releaseDate', label: 'Date de sortie' },
-    { value: 'title', label: 'Titre' },
-    { value: 'popularity', label: 'Popularité' },
-    { value: 'plays', label: "Nombre d'écoutes" },
-  ];
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadInitialData();
+    const fetchAudios = async () => {
+      try {
+        const response = await audioApi.getAll();
+        setAudios(response.data);
+      } catch (err) {
+        setError('Impossible de charger les audios');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAudios();
   }, []);
 
-  const loadInitialData = async () => {
+  const handleDelete = async (id) => {
     try {
-      setLoading(true);
-      const [audiosData, artistsData, albumsData, genresData] =
-        await Promise.all([
-          audioApi.getAll(),
-          artistsApi.getAll(),
-          albumsApi.getAll(),
-          api.get('/genres'),
-        ]);
-
-      setAudios(audiosData.data);
-      setFilters({
-        artists: artistsData.data,
-        albums: albumsData.data,
-        genres: genresData.data,
-      });
+      await audioApi.delete(id);
+      setAudios(audios.filter((audio) => audio._id !== id));
     } catch (err) {
-      setError('Erreur lors du chargement des données');
-    } finally {
-      setLoading(false);
+      setError('Erreur lors de la suppression');
     }
   };
 
-  const handleFilter = async (filterValues) => {
-    try {
-      setLoading(true);
-      let filteredData = audios;
+  const filteredAudios = audios.filter((audio) => {
+    // Définir la logique de filtrage
+    let isDurationValid = true;
 
-      if (filterValues.artist) {
-        const response = await filterService.getTracksByArtist(
-          filterValues.artist
-        );
-        filteredData = response.data;
-      }
-      if (filterValues.album) {
-        const response = await filterService.getTracksByAlbum(
-          filterValues.album
-        );
-        filteredData = response.data;
-      }
-      if (filterValues.sortBy) {
-        filteredData.sort((a, b) => {
-          const compareValue =
-            a[filterValues.sortBy] > b[filterValues.sortBy] ? 1 : -1;
-          return filterValues.sortOrder === 'asc'
-            ? compareValue
-            : -compareValue;
-        });
-      }
-
-      setAudios(filteredData);
-    } catch (err) {
-      setError('Erreur lors du filtrage');
-    } finally {
-      setLoading(false);
+    if (filter.duration) {
+      const [minDuration, maxDuration] = filter.duration.split('-').map(Number);
+      isDurationValid =
+        audio.duration >= minDuration &&
+        (maxDuration ? audio.duration <= maxDuration : true);
     }
-  };
+
+    let isYearValid = true;
+    if (filter.year) {
+      const audioYear = new Date(audio.releaseDate).getFullYear().toString();
+      isYearValid = audioYear === filter.year;
+    }
+
+    return (
+      audio.title.toLowerCase().includes(search.toLowerCase()) &&
+      (filter.album ? audio.album?.title === filter.album : true) &&
+      (filter.artist ? audio.artist?.name === filter.artist : true) &&
+      (filter.genre ? audio.genre === filter.genre : true) &&
+      isYearValid &&
+      isDurationValid
+    );
+  });
 
   return (
     <Layout>
-      <FilterPanel
-        onFilter={handleFilter}
-        filters={filters}
-        sortOptions={sortOptions}
-      />
-      <AudioList audios={audios} loading={loading} error={error} />
+      <div className="mb-6 flex flex-col md:flex-row justify-between items-center">
+        <h1 className="text-2xl font-bold">Liste des audios</h1>
+        <Button onClick={() => navigate('/audio/create')}>
+          Ajouter un audio
+        </Button>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-4">
+        <div className="grid grid-cols-1 gap-4">
+          <SearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input"
+          />
+          <select
+            className="input"
+            value={filter.album}
+            onChange={(e) => setFilter({ ...filter, album: e.target.value })}
+          >
+            <option value="">Album</option>
+            {[...new Set(audios.map((audio) => audio.album?.title))].map(
+              (album) =>
+                album && (
+                  <option key={album} value={album}>
+                    {album}
+                  </option>
+                )
+            )}
+          </select>
+          <select
+            className="input"
+            value={filter.artist}
+            onChange={(e) => setFilter({ ...filter, artist: e.target.value })}
+          >
+            <option value="">Artiste</option>
+            {[...new Set(audios.map((audio) => audio.artist?.name))].map(
+              (artist) =>
+                artist && (
+                  <option key={artist} value={artist}>
+                    {artist}
+                  </option>
+                )
+            )}
+          </select>
+          <select
+            className="input"
+            value={filter.genre}
+            onChange={(e) => setFilter({ ...filter, genre: e.target.value })}
+          >
+            <option value="">Genre</option>
+            {[...new Set(audios.map((audio) => audio.genre))].map(
+              (genre) =>
+                genre && (
+                  <option key={genre} value={genre}>
+                    {genre}
+                  </option>
+                )
+            )}
+          </select>
+          <input
+            type="number"
+            className="input"
+            placeholder="Année"
+            value={filter.year}
+            onChange={(e) => setFilter({ ...filter, year: e.target.value })}
+          />
+          <select
+            className="input"
+            value={filter.duration}
+            onChange={(e) => setFilter({ ...filter, duration: e.target.value })}
+          >
+            <option value="">Durée</option>
+            <option value="0-180">0-3 min</option>
+            <option value="181-300">3-5 min</option>
+            <option value="301+">5+ min</option>
+          </select>
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              setFilter({
+                album: '',
+                artist: '',
+                genre: '',
+                year: '',
+                duration: '',
+              })
+            }
+            className="btn btn-secondary"
+          >
+            Réinitialiser
+          </button>
+          <button type="submit" className="btn btn-primary">
+            Appliquer
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <p>Chargement...</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : (
+        <AudioList audios={filteredAudios} onDelete={handleDelete} />
+      )}
     </Layout>
   );
 };
