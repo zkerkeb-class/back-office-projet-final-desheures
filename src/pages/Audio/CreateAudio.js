@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable comma-dangle */
 import React, { useState } from 'react';
 import Layout from '../../components/layout/Layout/Layout';
@@ -15,6 +14,7 @@ const CreateAudio = () => {
     releaseDate: '',
     audioUrl: '',
   });
+  const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -27,12 +27,42 @@ const CreateAudio = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'audio/wav') {
+      setSelectedFile(file);
+    } else {
+      setError('Veuillez sélectionner un fichier .wav');
+    }
+  };
+
+  const uploadFile = async (file) => {
+    // Ici, tu dois implémenter l'envoi du fichier vers ton serveur ou un stockage externe
+    // Pour cet exemple, on suppose que l'API retourne une URL après l'upload
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await audioApi.upload(formData); // Modifier selon ton API
+      return response.data.audioUrl; // Supposons que l'API retourne { audioUrl: "https://..." }
+    } catch (err) {
+      throw new Error("Erreur lors de l'upload du fichier");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
-      await audioApi.create(audioData);
+      let audioUrl = audioData.audioUrl;
+
+      if (selectedFile) {
+        audioUrl = await uploadFile(selectedFile);
+      }
+
+      await audioApi.create({ ...audioData, audioUrl });
       navigate('/audio');
     } catch (err) {
       setError("Erreur lors de l'ajout de l'audio");
@@ -158,17 +188,17 @@ const CreateAudio = () => {
 
           <div>
             <label
-              htmlFor="audioUrl"
+              htmlFor="audioFile"
               className="block text-sm font-semibold text-gray-400 mb-2"
             >
-              URL de l'audio
+              Sélectionner un fichier audio (.wav)
             </label>
             <input
-              type="text"
-              id="audioUrl"
-              name="audioUrl"
-              value={audioData.audioUrl}
-              onChange={handleChange}
+              type="file"
+              id="audioFile"
+              name="audioFile"
+              accept=".wav"
+              onChange={handleFileChange}
               required
               className="input"
             />

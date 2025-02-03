@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout/Layout';
 import Button from '../../components/common/Button/Button';
-import { audioApi } from '../../services/api';
-import { artistApi } from '../../services/api';
+import { audioApi, artistApi } from '../../services/api';
 
 const UpdateAudio = () => {
   const { id } = useParams();
@@ -15,6 +14,7 @@ const UpdateAudio = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     artist: '',
@@ -48,25 +48,46 @@ const UpdateAudio = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    setFormData((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'audio/wav') {
+      setSelectedFile(file);
+    } else {
+      setError('Veuillez sélectionner un fichier .wav');
+    }
+  };
+
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await audioApi.upload(formData);
+      return response.data.fileUrl;
+    } catch (err) {
+      throw new Error("Erreur lors de l'upload du fichier");
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUpdating(true);
     try {
+      let fileUrl = formData.fileUrl;
+      if (selectedFile) {
+        fileUrl = await uploadFile(selectedFile);
+      }
+
       const updatedAudio = {
         ...audio,
         title: formData.title,
         artist: formData.artist,
-        fileUrl: formData.fileUrl,
+        fileUrl,
       };
-
       await audioApi.update(id, updatedAudio);
-      setAudio(updatedAudio);
       navigate(`/audio/${id}`);
     } catch (err) {
       setError("Erreur lors de la mise à jour de l'audio.");
@@ -98,7 +119,7 @@ const UpdateAudio = () => {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              className="w-full p-3 bg-[#1F1F23] text-white rounded-md focus:ring-2 focus:ring-[#A238FF] focus:outline-none"
+              className="input"
               required
             />
           </div>
@@ -115,7 +136,7 @@ const UpdateAudio = () => {
               name="artist"
               value={formData.artist}
               onChange={handleChange}
-              className="w-full p-3 bg-[#1F1F23] text-white rounded-md focus:ring-2 focus:ring-[#A238FF] focus:outline-none"
+              className="input"
               required
             >
               <option value="">Sélectionner un artiste</option>
@@ -129,19 +150,18 @@ const UpdateAudio = () => {
 
           <div className="mb-4">
             <label
-              htmlFor="fileUrl"
+              htmlFor="audioFile"
               className="block text-sm font-medium text-gray-400 mb-2"
             >
-              URL du fichier audio
+              Sélectionner un fichier audio (.wav)
             </label>
             <input
-              type="text"
-              id="fileUrl"
-              name="fileUrl"
-              value={formData.fileUrl}
-              onChange={handleChange}
-              className="w-full p-3 bg-[#1F1F23] text-white rounded-md focus:ring-2 focus:ring-[#A238FF] focus:outline-none"
-              required
+              type="file"
+              id="audioFile"
+              name="audioFile"
+              accept=".wav"
+              onChange={handleFileChange}
+              className="input"
             />
           </div>
 
@@ -149,7 +169,7 @@ const UpdateAudio = () => {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => window.history.back()}
+              onClick={() => navigate(-1)}
             >
               Annuler
             </Button>

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable comma-dangle */
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/layout/Layout/Layout';
@@ -6,9 +7,12 @@ import SearchBar from '../../components/common/SearchBar/SearchBar';
 import Button from '../../components/common/Button/Button';
 import { useNavigate } from 'react-router-dom';
 import { audioApi } from '../../services/api';
+import { filterService } from '../../services/filter';
+import SortBarAudio from '../../components/common/SortBar/SortBarAudio/SortBarAudio';
 
 const Audio = () => {
   const [audios, setAudios] = useState([]);
+  const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -19,6 +23,8 @@ const Audio = () => {
     year: '',
     duration: '',
   });
+  const [sortBy, setSortBy] = useState('alphabetical');
+  const [sortOrder, setSortOrder] = useState('asc');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,8 +39,36 @@ const Audio = () => {
       }
     };
 
+    const fetchGenres = async () => {
+      try {
+        const response = await filterService.getGenres();
+        setGenres(response.data);
+      } catch (err) {
+        console.error('Erreur lors du chargement des genres', err);
+      }
+    };
+
     fetchAudios();
+    fetchGenres();
   }, []);
+
+  const handleSort = () => {
+    let sortedAudios = [...audios];
+
+    if (sortBy === 'alphabetical') {
+      sortedAudios = sortedAudios.sort((a, b) =>
+        sortOrder === 'asc'
+          ? a.title.localeCompare(b.title)
+          : b.title.localeCompare(a.title)
+      );
+    } else if (sortBy === 'duration') {
+      sortedAudios = sortedAudios.sort((a, b) =>
+        sortOrder === 'asc' ? a.duration - b.duration : b.duration - a.duration
+      );
+    }
+
+    setAudios(sortedAudios);
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -46,7 +80,6 @@ const Audio = () => {
   };
 
   const filteredAudios = audios.filter((audio) => {
-    // Définir la logique de filtrage
     let isDurationValid = true;
 
     if (filter.duration) {
@@ -124,14 +157,11 @@ const Audio = () => {
             onChange={(e) => setFilter({ ...filter, genre: e.target.value })}
           >
             <option value="">Genre</option>
-            {[...new Set(audios.map((audio) => audio.genre))].map(
-              (genre) =>
-                genre && (
-                  <option key={genre} value={genre}>
-                    {genre}
-                  </option>
-                )
-            )}
+            {genres.map((genre) => (
+              <option key={genre} value={genre}>
+                {genre}
+              </option>
+            ))}
           </select>
           <input
             type="number"
@@ -151,28 +181,38 @@ const Audio = () => {
             <option value="301+">5+ min</option>
           </select>
         </div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() =>
-              setFilter({
-                album: '',
-                artist: '',
-                genre: '',
-                year: '',
-                duration: '',
-              })
-            }
-            className="btn btn-secondary"
-          >
-            Réinitialiser
-          </button>
-          <button type="submit" className="btn btn-primary">
-            Appliquer
-          </button>
+        <div className="mt-4 flex justify-between items-center gap-2">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                setFilter({
+                  album: '',
+                  artist: '',
+                  genre: '',
+                  year: '',
+                  duration: '',
+                })
+              }
+              className="btn btn-secondary"
+            >
+              Réinitialiser
+            </button>
+            <button type="submit" className="btn btn-primary">
+              Appliquer
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <SortBarAudio
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortByChange={setSortBy}
+              onSortOrderChange={setSortOrder}
+            />
+            <Button onClick={handleSort}>Appliquer</Button>
+          </div>
         </div>
       </div>
-
       {loading ? (
         <p>Chargement...</p>
       ) : error ? (
