@@ -8,27 +8,26 @@ import { albumApi, audioApi, artistApi } from '../../services/api';
 const CreateAlbum = () => {
   const [albumData, setAlbumData] = useState({
     title: '',
-    artist: '', // ID de l'artiste
+    artist: '',
     releaseDate: '',
     genres: [],
     coverUrl: '',
-    tracks: [], // Tableau d'ID de musiques
+    tracks: [],
   });
-  const [audios, setAudios] = useState([]); // Stocker les musiques récupérées
-  const [artists, setArtists] = useState([]); // Stocker les artistes récupérés
-  const [searchTerm, setSearchTerm] = useState(''); // Terme de recherche pour les musiques
+  const [audios, setAudios] = useState([]);
+  const [artists, setArtists] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Récupérer les musiques et artistes de la base de données
   useEffect(() => {
     const fetchAudiosAndArtists = async () => {
       try {
         const audioResponse = await audioApi.getAll();
         const artistResponse = await artistApi.getAll();
-        setAudios(audioResponse.data); // Stocker les musiques
-        setArtists(artistResponse.data); // Stocker les artistes
+        setAudios(audioResponse.data);
+        setArtists(artistResponse.data);
       } catch (err) {
         setError('Impossible de charger les musiques ou les artistes');
       }
@@ -36,7 +35,6 @@ const CreateAlbum = () => {
     fetchAudiosAndArtists();
   }, []);
 
-  // Gérer le changement de champ dans le formulaire
   const handleChange = (e) => {
     const { name, value } = e.target;
     setAlbumData((prevData) => ({
@@ -45,7 +43,6 @@ const CreateAlbum = () => {
     }));
   };
 
-  // Gérer la modification des genres
   const handleGenresChange = (e) => {
     const { value } = e.target;
     const genresArray = value.split(',').map((genre) => genre.trim());
@@ -55,7 +52,6 @@ const CreateAlbum = () => {
     }));
   };
 
-  // Gérer la sélection des musiques
   const handleTrackSelection = (e) => {
     const { value, checked } = e.target;
     setAlbumData((prevData) => ({
@@ -66,12 +62,10 @@ const CreateAlbum = () => {
     }));
   };
 
-  // Gérer la recherche parmi les musiques
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  // Soumettre le formulaire
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -86,7 +80,6 @@ const CreateAlbum = () => {
     }
   };
 
-  // Filtrer les musiques par le terme de recherche
   const filteredAudios = audios.filter((audio) =>
     audio.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -102,7 +95,10 @@ const CreateAlbum = () => {
           {error && <p className="text-red-500">{error}</p>}
 
           <div>
-            <label htmlFor="title" className="block text-sm font-semibold">
+            <label
+              htmlFor="title"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               Titre de l'album
             </label>
             <input
@@ -117,7 +113,10 @@ const CreateAlbum = () => {
           </div>
 
           <div>
-            <label htmlFor="artist" className="block text-sm font-semibold">
+            <label
+              htmlFor="artist"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               Artiste
             </label>
             <select
@@ -140,7 +139,7 @@ const CreateAlbum = () => {
           <div>
             <label
               htmlFor="releaseDate"
-              className="block text-sm font-semibold"
+              className="block text-sm font-semibold text-gray-400 mb-2"
             >
               Date de sortie
             </label>
@@ -155,7 +154,10 @@ const CreateAlbum = () => {
           </div>
 
           <div>
-            <label htmlFor="genres" className="block text-sm font-semibold">
+            <label
+              htmlFor="genres"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               Genres (séparés par des virgules)
             </label>
             <input
@@ -169,7 +171,10 @@ const CreateAlbum = () => {
           </div>
 
           <div>
-            <label htmlFor="coverUrl" className="block text-sm font-semibold">
+            <label
+              htmlFor="coverUrl"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               URL de la couverture
             </label>
             <input
@@ -183,7 +188,10 @@ const CreateAlbum = () => {
           </div>
 
           <div>
-            <label htmlFor="tracks" className="block text-sm font-semibold">
+            <label
+              htmlFor="tracks"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               Sélectionner les musiques
             </label>
             <input
@@ -194,7 +202,7 @@ const CreateAlbum = () => {
               onChange={handleSearchChange}
               className="input"
             />
-            <div className="mt-2 space-y-2">
+            <div className="mt-2 space-y-2 text-white">
               {filteredAudios.map((audio) => (
                 <div key={audio._id} className="flex items-center">
                   <input

@@ -82,7 +82,7 @@ const UpdateAudio = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-4">Modifier l'audio</h1>
+        <h1 className="text-2xl font-bold mb-4 text-white">Modifier l'audio</h1>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

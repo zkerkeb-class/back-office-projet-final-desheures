@@ -129,7 +129,7 @@ const UpdateAlbums = () => {
   return (
     <Layout>
       <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-4">Modifier l'album</h1>
+        <h1 className="text-2xl font-bold mb-4 text-white">Modifier l'album</h1>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -193,7 +193,7 @@ const UpdateAlbums = () => {
               ))}
             </select>
           </div>
-          <h2 className="text-xl font-semibold mb-2 mt-4">
+          <h2 className="text-xl font-semibold mb-2 mt-4 text-white">
             Liste des musiques :
           </h2>
           {album.tracks && album.tracks.length > 0 ? (
@@ -231,7 +231,7 @@ const UpdateAlbums = () => {
           </div>
         </form>
 
-        <h3 className="text-xl font-semibold mb-2 mt-4">
+        <h3 className="text-xl font-semibold mb-2 mt-4 text-white">
           Ajouter une musique :
         </h3>
         <div className="mb-4">

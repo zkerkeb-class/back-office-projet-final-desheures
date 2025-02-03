@@ -52,7 +52,10 @@ const CreateAudio = () => {
           {error && <p className="text-red-500">{error}</p>}
 
           <div>
-            <label htmlFor="title" className="block text-sm font-semibold">
+            <label
+              htmlFor="title"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               Titre
             </label>
             <input
@@ -67,7 +70,10 @@ const CreateAudio = () => {
           </div>
 
           <div>
-            <label htmlFor="artist" className="block text-sm font-semibold">
+            <label
+              htmlFor="artist"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               Artiste
             </label>
             <input
@@ -82,7 +88,10 @@ const CreateAudio = () => {
           </div>
 
           <div>
-            <label htmlFor="album" className="block text-sm font-semibold">
+            <label
+              htmlFor="album"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               Album
             </label>
             <input
@@ -96,7 +105,10 @@ const CreateAudio = () => {
           </div>
 
           <div>
-            <label htmlFor="genre" className="block text-sm font-semibold">
+            <label
+              htmlFor="genre"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               Genre
             </label>
             <input
@@ -110,7 +122,10 @@ const CreateAudio = () => {
           </div>
 
           <div>
-            <label htmlFor="duration" className="block text-sm font-semibold">
+            <label
+              htmlFor="duration"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               Durée (en secondes)
             </label>
             <input
@@ -127,7 +142,7 @@ const CreateAudio = () => {
           <div>
             <label
               htmlFor="releaseDate"
-              className="block text-sm font-semibold"
+              className="block text-sm font-semibold text-gray-400 mb-2"
             >
               Date de sortie
             </label>
@@ -142,7 +157,10 @@ const CreateAudio = () => {
           </div>
 
           <div>
-            <label htmlFor="audioUrl" className="block text-sm font-semibold">
+            <label
+              htmlFor="audioUrl"
+              className="block text-sm font-semibold text-gray-400 mb-2"
+            >
               URL de l'audio
             </label>
             <input
