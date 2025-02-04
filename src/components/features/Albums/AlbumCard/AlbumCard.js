@@ -26,9 +26,10 @@ const AlbumCard = ({ album, onDelete }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       <img
-        src={getImageUrl(album.coverUrl) || 'uploads/images/default_cover.jpg'}
+        src={getImageUrl(album.coverUrl)}
         alt={album.title}
         className="w-full h-48 object-cover"
+        loading="lazy"
       />
       <div className="p-4">
         <h3 className="text-xl font-bold mb-2 text-white">

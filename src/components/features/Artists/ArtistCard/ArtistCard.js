@@ -18,6 +18,7 @@ const ArtistCard = ({ artist, onDelete }) => {
         src={getImageUrl(artist.imageUrl) || 'uploads/images/default_cover.jpg'}
         alt={artist.name}
         className="w-full h-48 object-cover"
+        loading="lazy"
       />
       <div className="p-4">
         <h3 className="text-xl font-bold mb-2 text-white">{artist.name}</h3>

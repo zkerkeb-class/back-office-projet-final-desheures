@@ -4,6 +4,14 @@ import Button from '../../../common/Button/Button';
 import { formatDuration } from '../../../../utils/formatters';
 
 const AudioCard = ({ audio, onDelete }) => {
+  // const API_URL = process.env.REACT_APP_BACKEND_IMAGE;
+
+  // const getAudioUrl = (url) => {
+  //   if (url?.startsWith('http')) {
+  //     return url;
+  //   }
+  //   return `${API_URL}${url}/`;
+  // };
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       <div className="p-4">
@@ -17,6 +25,12 @@ const AudioCard = ({ audio, onDelete }) => {
         <p className="text-gray-600 dark:text-gray-400 mb-4">
           Durée: {formatDuration(audio.duration)}
         </p>
+        {/* <div className="w-full mb-4">
+          <audio controls className="w-full">
+            <source src={getAudioUrl(audio.audioUrl)} type="audio/wav" />
+            Votre navigateur ne supporte pas la lecture audio.
+          </audio>
+        </div> */}
         <div className="flex justify-end space-x-2">
           <Link to={`/audio/update/${audio._id}`}>
             <Button variant="secondary">Modifier</Button>
