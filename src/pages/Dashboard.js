@@ -12,7 +12,9 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const response = await fetch('http://localhost:3030/api/metrics');
+        const response = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/metrics`
+        );
         const data = await response.json();
         setMetrics(data);
         setLastUpdate(new Date().toLocaleTimeString());

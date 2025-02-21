@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';

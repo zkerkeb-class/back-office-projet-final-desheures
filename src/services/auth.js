@@ -2,15 +2,16 @@
 /* eslint-disable no-console */
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3030/api';
-
 export const authService = {
   login: async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/auth/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);

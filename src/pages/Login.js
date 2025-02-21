@@ -6,6 +6,7 @@ import { useForm } from '../hooks/useForm';
 import InputField from '../components/common/InputField/InputField';
 import Button from '../components/common/Button/Button';
 import { validateForm } from '../utils/validation';
+import { logger } from '../../../back-end-projet-final-desheures/src/config';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const Login = () => {
       await login(values.email, values.password);
       navigate('/dashboard');
     } catch (error) {
-      console.error('Erreur de connexion:', error);
+      logger.error('Erreur de connexion:', error);
       throw new Error(error.message || 'Erreur lors de la connexion');
     }
   };
