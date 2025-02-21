@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable comma-dangle */
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Layout from '../../components/layout/Layout/Layout';
 import Button from '../../components/common/Button/Button';
 import { albumApi } from '../../services/api';
@@ -177,22 +177,40 @@ const UpdateAlbums = () => {
             >
               Artiste
             </label>
-            <select
-              id="artist"
-              name="artist"
-              value={formData.artist}
-              onChange={handleChange}
-              className="w-full p-3 bg-[#1F1F23] text-white rounded-md focus:ring-2 focus:ring-[#A238FF] focus:outline-none"
-              required
-            >
-              <option value="">Sélectionner un artiste</option>
-              {availableArtists.map((artist) => (
-                <option key={artist._id} value={artist._id}>
-                  {artist.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex gap-2 items-center">
+              <select
+                id="artist"
+                name="artist"
+                value={formData.artist}
+                onChange={handleChange}
+                className="w-full p-3 bg-[#1F1F23] text-white rounded-md focus:ring-2 focus:ring-[#A238FF] focus:outline-none"
+                required
+              >
+                <option value="">Sélectionner un artiste</option>
+                {availableArtists.map((artist) => (
+                  <option key={artist._id} value={artist._id}>
+                    {artist.name}
+                  </option>
+                ))}
+              </select>
+              {formData.artist && (
+                <Link
+                  to={`/artist/update/${formData.artist}`}
+                  className="text-[#A238FF] hover:text-[#8429DB] p-2"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  </svg>
+                </Link>
+              )}
+            </div>
           </div>
+
           <h2 className="text-xl font-semibold mb-2 mt-4 text-white">
             Liste des musiques :
           </h2>
@@ -203,14 +221,31 @@ const UpdateAlbums = () => {
                   key={track._id}
                   className="mb-1 flex justify-between items-center"
                 >
-                  {index + 1}. {track.title}
-                  <Button
-                    variant="danger"
-                    onClick={() => handleRemoveTrack(track._id)}
-                    disabled={isUpdating}
-                  >
-                    Supprimer
-                  </Button>
+                  <span>
+                    {index + 1}. {track.title}
+                  </span>
+                  <div className="flex gap-2 items-center">
+                    <Link
+                      to={`/audio/update/${track._id}`}
+                      className="text-[#A238FF] hover:text-[#8429DB] p-2"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </Link>
+                    <Button
+                      variant="danger"
+                      onClick={() => handleRemoveTrack(track._id)}
+                      disabled={isUpdating}
+                    >
+                      Supprimer
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>

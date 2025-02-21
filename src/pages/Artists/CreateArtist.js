@@ -16,7 +16,7 @@ const CreateArtist = () => {
     namePhonetic: '',
     genres: [],
     bio: '',
-    imageUrl: '',
+    imageUrl: 'uploads/images/default_artist.webp',
   });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,16 +43,19 @@ const CreateArtist = () => {
     setError(null);
 
     try {
+      const dataToSubmit = {
+        ...formData,
+        genres: formData.genres.filter((genre) => genre),
+        imageUrl: formData.imageUrl || 'uploads/images/default_artist.webp',
+      };
+
       const response = await fetch(`${API_URL}/artist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ...formData,
-          genres: formData.genres.filter((genre) => genre),
-        }),
+        body: JSON.stringify(dataToSubmit),
       });
 
       if (!response.ok) {
@@ -133,10 +136,11 @@ const CreateArtist = () => {
           <InputField
             id="imageUrl"
             name="imageUrl"
-            label="URL de l'image"
+            label="URL de l'image (optionnel)"
             type="text"
             value={formData.imageUrl}
             onChange={handleChange}
+            placeholder="Laissez vide pour utiliser l'image par défaut"
           />
 
           <div className="flex justify-end gap-4 pt-6">
