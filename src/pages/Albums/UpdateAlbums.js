@@ -9,24 +9,27 @@ import { audioApi } from '../../services/api';
 import { artistApi } from '../../services/api';
 
 const UpdateAlbums = () => {
-  const { id } = useParams();
-  const [album, setAlbum] = useState(null);
-  const [availableTracks, setAvailableTracks] = useState([]);
-  const [availableArtists, setAvailableArtists] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [isUpdating, setIsUpdating] = useState(false);
+  const { id } = useParams(); // Récupère l'ID de l'album depuis les paramètres de l'URL
+  const [album, setAlbum] = useState(null); // État pour stocker l'album à modifier
+  const [availableTracks, setAvailableTracks] = useState([]); // État pour stocker les pistes disponibles
+  const [availableArtists, setAvailableArtists] = useState([]); // État pour stocker les artistes disponibles
+  const [loading, setLoading] = useState(true); // État pour gérer le chargement
+  const [error, setError] = useState(''); // État pour gérer les erreurs
+  const [isUpdating, setIsUpdating] = useState(false); // État pour vérifier si une mise à jour est en cours
   const [formData, setFormData] = useState({
+    // État pour les données du formulaire
     title: '',
     releaseDate: '',
     artist: '',
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredTracks, setFilteredTracks] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(''); // État pour gérer la recherche de pistes
+  const [filteredTracks, setFilteredTracks] = useState([]); // État pour les pistes filtrées en fonction de la recherche
 
+  // Hook pour charger les données de l'album, les pistes et les artistes
   useEffect(() => {
     const fetchAlbum = async () => {
       try {
+        // Récupère l'album à partir de l'API
         const albumResponse = await albumApi.getById(id);
         setAlbum(albumResponse.data);
         setFormData({
@@ -35,9 +38,11 @@ const UpdateAlbums = () => {
           artist: albumResponse.data.artist?._id || '',
         });
 
+        // Récupère les pistes disponibles
         const tracksResponse = await audioApi.getAll();
         setAvailableTracks(tracksResponse.data);
 
+        // Récupère les artistes disponibles
         const artistsResponse = await artistApi.getAll();
         setAvailableArtists(artistsResponse.data);
       } catch (err) {
@@ -52,6 +57,7 @@ const UpdateAlbums = () => {
     fetchAlbum();
   }, [id]);
 
+  // Hook pour filtrer les pistes en fonction de la recherche
   useEffect(() => {
     if (searchQuery) {
       const results = availableTracks.filter((track) =>
@@ -63,6 +69,7 @@ const UpdateAlbums = () => {
     }
   }, [searchQuery, availableTracks]);
 
+  // Fonction pour gérer le changement des champs du formulaire
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -71,6 +78,7 @@ const UpdateAlbums = () => {
     }));
   };
 
+  // Fonction pour ajouter une piste à l'album
   const handleAddTrack = async (trackId) => {
     setIsUpdating(true);
     try {
@@ -87,6 +95,7 @@ const UpdateAlbums = () => {
     }
   };
 
+  // Fonction pour supprimer une piste de l'album
   const handleRemoveTrack = async (trackId) => {
     setIsUpdating(true);
     try {
@@ -103,6 +112,7 @@ const UpdateAlbums = () => {
     }
   };
 
+  // Fonction pour gérer la soumission du formulaire (mise à jour de l'album)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUpdating(true);
@@ -122,6 +132,7 @@ const UpdateAlbums = () => {
     }
   };
 
+  // Gère l'état de chargement et d'erreur
   if (loading) return <p>Chargement...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
   if (!album) return <p>Aucun album trouvé.</p>;

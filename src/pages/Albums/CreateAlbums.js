@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../../components/layout/Layout/Layout';
 import { useNavigate } from 'react-router-dom';
 import { albumApi, audioApi, artistApi } from '../../services/api';
+import InputField from '../../components/common/InputField/InputField';
+import Button from '../../components/common/Button/Button';
 
 const CreateAlbum = () => {
   const [albumData, setAlbumData] = useState({
@@ -86,36 +88,29 @@ const CreateAlbum = () => {
 
   return (
     <Layout>
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Créer un album</h1>
-      </div>
+      <div className="bg-[#29282D] rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-white mb-6">Créer un album</h1>
 
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <p className="text-red-500">{error}</p>}
-
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Titre de l'album
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={albumData.title}
-              onChange={handleChange}
-              required
-              className="input"
-            />
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
           </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <InputField
+            id="title"
+            name="title"
+            label="Titre de l'album"
+            value={albumData.title}
+            onChange={handleChange}
+            required
+          />
 
           <div>
             <label
               htmlFor="artist"
-              className="block text-sm font-semibold text-gray-400 mb-2"
+              className="block text-sm font-medium text-gray-400 mb-2"
             >
               Artiste
             </label>
@@ -125,7 +120,7 @@ const CreateAlbum = () => {
               value={albumData.artist}
               onChange={handleChange}
               required
-              className="input"
+              className="w-full p-3 bg-[#29282D] text-white rounded-md focus:ring-2 focus:ring-[#A238FF] focus:outline-none border-2 border-[#A238FF]"
             >
               <option value="">Sélectionnez un artiste</option>
               {artists.map((artist) => (
@@ -136,61 +131,46 @@ const CreateAlbum = () => {
             </select>
           </div>
 
-          <div>
-            <label
-              htmlFor="releaseDate"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Date de sortie
-            </label>
-            <input
-              type="date"
-              id="releaseDate"
-              name="releaseDate"
-              value={albumData.releaseDate}
-              onChange={handleChange}
-              className="input"
-            />
-          </div>
+          <InputField
+            id="releaseDate"
+            name="releaseDate"
+            label="Date de sortie"
+            value={albumData.releaseDate}
+            onChange={handleChange}
+            type="date"
+          />
 
-          <div>
-            <label
-              htmlFor="genres"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Genres (séparés par des virgules)
-            </label>
-            <input
-              type="text"
-              id="genres"
-              name="genres"
-              value={albumData.genres.join(', ')}
-              onChange={handleGenresChange}
-              className="input"
-            />
-          </div>
+          <InputField
+            id="genres"
+            name="genres"
+            label="Genres (séparés par des virgules)"
+            value={albumData.genres.join(', ')}
+            onChange={handleGenresChange}
+          />
 
-          <div>
-            <label
-              htmlFor="coverUrl"
-              className="block text-sm font-semibold text-gray-400 mb-2"
+          <InputField
+            id="coverUrl"
+            name="coverUrl"
+            label="URL de la couverture"
+            value={albumData.coverUrl}
+            onChange={handleChange}
+          />
+          <div className="flex justify-end gap-4 pt-6">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate('/albums')}
             >
-              URL de la couverture
-            </label>
-            <input
-              type="text"
-              id="coverUrl"
-              name="coverUrl"
-              value={albumData.coverUrl}
-              onChange={handleChange}
-              className="input"
-            />
+              Annuler
+            </Button>
+            <Button type="submit" variant="primary" disabled={loading}>
+              {loading ? 'Chargement...' : 'Créer'}
+            </Button>
           </div>
-
           <div>
             <label
               htmlFor="tracks"
-              className="block text-sm font-semibold text-gray-400 mb-2"
+              className="block text-sm font-medium text-gray-400 mb-2"
             >
               Sélectionner les musiques
             </label>
@@ -200,7 +180,7 @@ const CreateAlbum = () => {
               placeholder="Rechercher des musiques..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="input"
+              className="w-full p-3 bg-[#29282D] text-white rounded-md focus:ring-2 focus:ring-[#A238FF] focus:outline-none border-2 border-gray-600 mb-2"
             />
             <div className="mt-2 space-y-2 text-white">
               {filteredAudios.map((audio) => (
@@ -217,23 +197,6 @@ const CreateAlbum = () => {
                 </div>
               ))}
             </div>
-          </div>
-
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => navigate('/albums')}
-              className="btn btn-secondary"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? 'Chargement...' : 'Créer'}
-            </button>
           </div>
         </form>
       </div>

@@ -1,14 +1,13 @@
 /* eslint-disable comma-dangle */
 import React from 'react';
 
-const InputField = ({
+const SelectField = ({
   id,
   label,
-  type = 'text',
   value,
   onChange,
+  options,
   error,
-  placeholder = '',
   required = false,
 }) => {
   return (
@@ -20,19 +19,16 @@ const InputField = ({
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      <input
+      <select
         id={id}
         name={id}
-        type={type}
         value={value}
         onChange={onChange}
-        placeholder={placeholder}
         required={required}
-        className={`
-          w-full p-3 
-          bg-[#29282D]
-          border-2
-          border-gray-600
+        className={`w-full p-3 
+          bg-[#29282D] 
+          border-2 
+          border-gray-600 
           text-white 
           rounded-md 
           focus:ring-2 
@@ -40,10 +36,17 @@ const InputField = ({
           focus:outline-none
           ${error ? 'border-red-500' : 'border-gray-300'}
         `}
-      />
+      >
+        <option value="">Sélectionner</option>
+        {options.map((option, index) => (
+          <option key={index} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
   );
 };
 
-export default InputField;
+export default SelectField;

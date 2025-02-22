@@ -31,7 +31,7 @@ const ArtistCard = ({ artist, onDelete }) => {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-white dark:bg-[#29282D] rounded-lg shadow-lg overflow-hidden">
         <img
           src={
             getImageUrl(artist.imageUrl) || 'uploads/images/default_cover.jpg'

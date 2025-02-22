@@ -4,21 +4,22 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout/Layout';
 import Button from '../../components/common/Button/Button';
-import { audioApi, artistApi } from '../../services/api';
+import { audioApi } from '../../services/api';
+import InputField from '../../components/common/InputField/InputField';
 
 const UpdateAudio = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [audio, setAudio] = useState(null);
-  const [availableArtists, setAvailableArtists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     artist: '',
-    fileUrl: '',
+    genres: [],
   });
 
   useEffect(() => {
@@ -28,16 +29,11 @@ const UpdateAudio = () => {
         setAudio(audioResponse.data);
         setFormData({
           title: audioResponse.data.title,
-          artist: audioResponse.data.artist?._id || '',
-          fileUrl: audioResponse.data.fileUrl,
+          artist: audioResponse.data.artist?.name || '',
+          genres: audioResponse.data.genres,
         });
-
-        const artistsResponse = await artistApi.getAll();
-        setAvailableArtists(artistsResponse.data);
       } catch (err) {
-        setError(
-          "Impossible de charger les informations de l'audio ou des artistes disponibles."
-        );
+        setError("Impossible de charger les informations de l'audio.");
       } finally {
         setLoading(false);
       }
@@ -51,24 +47,36 @@ const UpdateAudio = () => {
     setFormData((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileSelect = (e) => {
     const file = e.target.files[0];
-    if (file && file.type === 'audio/wav') {
+    if (file && file.type.startsWith('audio/')) {
       setSelectedFile(file);
+      setError('');
     } else {
-      setError('Veuillez sélectionner un fichier .wav');
+      setError('Le fichier doit être un fichier audio');
     }
   };
 
-  const uploadFile = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
 
-    try {
-      const response = await audioApi.upload(formData);
-      return response.data.fileUrl;
-    } catch (err) {
-      throw new Error("Erreur lors de l'upload du fichier");
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('audio/')) {
+      setSelectedFile(file);
+      setError('');
+    } else {
+      setError('Le fichier doit être un fichier audio');
     }
   };
 
@@ -76,18 +84,15 @@ const UpdateAudio = () => {
     e.preventDefault();
     setIsUpdating(true);
     try {
-      let fileUrl = formData.fileUrl;
+      const formDataToSubmit = new FormData();
       if (selectedFile) {
-        fileUrl = await uploadFile(selectedFile);
+        formDataToSubmit.append('file', selectedFile);
       }
 
-      const updatedAudio = {
-        ...audio,
-        title: formData.title,
-        artist: formData.artist,
-        fileUrl,
-      };
-      await audioApi.update(id, updatedAudio);
+      formDataToSubmit.append('title', formData.title);
+      formDataToSubmit.append('artist', formData.artist);
+      formDataToSubmit.append('genres', formData.genres);
+      await audioApi.update(id, formDataToSubmit);
       navigate(`/audio/${id}`);
     } catch (err) {
       setError("Erreur lors de la mise à jour de l'audio.");
@@ -102,7 +107,7 @@ const UpdateAudio = () => {
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+      <div className="max-w-3xl mx-auto bg-white dark:bg-[#29282D] p-6 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold mb-4 text-white">Modifier l'audio</h1>
 
         <form onSubmit={handleSubmit}>
@@ -113,14 +118,13 @@ const UpdateAudio = () => {
             >
               Titre de l'audio
             </label>
-            <input
+            <InputField
               type="text"
               id="title"
               name="title"
               value={formData.title}
               onChange={handleChange}
               className="input"
-              required
             />
           </div>
 
@@ -131,38 +135,78 @@ const UpdateAudio = () => {
             >
               Artiste
             </label>
-            <select
+            <InputField
+              type="text"
               id="artist"
               name="artist"
               value={formData.artist}
               onChange={handleChange}
               className="input"
-              required
-            >
-              <option value="">Sélectionner un artiste</option>
-              {availableArtists.map((artist) => (
-                <option key={artist._id} value={artist._id}>
-                  {artist.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           <div className="mb-4">
             <label
-              htmlFor="audioFile"
+              htmlFor="genres"
               className="block text-sm font-medium text-gray-400 mb-2"
             >
-              Sélectionner un fichier audio (.wav)
+              Genre
             </label>
-            <input
-              type="file"
-              id="audioFile"
-              name="audioFile"
-              accept=".wav"
-              onChange={handleFileChange}
+            <InputField
+              type="text"
+              id="genres"
+              name="genres"
+              value={formData.genres}
+              onChange={handleChange}
               className="input"
             />
+          </div>
+
+          <div
+            className={`border-2 border-dashed rounded-lg p-8 mb-4 text-center ${
+              dragActive
+                ? 'border-[#A238FF] bg-[#A238FF]/10'
+                : 'border-gray-600'
+            }`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+          >
+            <input
+              type="file"
+              accept="audio/*"
+              className="hidden"
+              id="audio-file"
+              onChange={handleFileSelect}
+            />
+            <label
+              htmlFor="audio-file"
+              className="cursor-pointer block text-gray-400"
+            >
+              {selectedFile ? (
+                <div className="text-white">
+                  <p className="text-[#A238FF]">
+                    Fichier sélectionné: {selectedFile.name}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-lg mb-2">
+                    Glissez et déposez votre fichier audio ici
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    ou cliquez pour sélectionner un fichier
+                  </p>
+                </div>
+              )}
+              {audio.audioUrl && !selectedFile && (
+                <div className="text-white mt-4">
+                  <p>URL de l'audio: </p>
+                  <p className="text-[#A238FF]">{audio.audioUrl}</p>
+                </div>
+              )}
+            </label>
           </div>
 
           <div className="flex justify-end gap-4 pt-6">

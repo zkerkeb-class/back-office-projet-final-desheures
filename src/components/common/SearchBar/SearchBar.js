@@ -1,14 +1,9 @@
 /* eslint-disable comma-dangle */
 import React from 'react';
 
-const SearchBar = ({
-  value,
-  onChange,
-  placeholder = 'Rechercher...',
-  className = '',
-}) => {
+const SearchBar = ({ value, onChange, placeholder = 'Rechercher...' }) => {
   return (
-    <div className={`relative ${className}`}>
+    <div className="mb-4 relative">
       <input
         type="text"
         value={value}
