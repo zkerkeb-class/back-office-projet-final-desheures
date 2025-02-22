@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable comma-dangle */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';

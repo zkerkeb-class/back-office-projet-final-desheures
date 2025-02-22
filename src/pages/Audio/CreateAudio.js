@@ -1,71 +1,97 @@
+/* eslint-disable no-console */
 /* eslint-disable comma-dangle */
 import React, { useState } from 'react';
 import Layout from '../../components/layout/Layout/Layout';
 import { useNavigate } from 'react-router-dom';
 import { audioApi } from '../../services/api';
+import InputField from '../../components/common/InputField/InputField';
+import Button from '../../components/common/Button/Button';
 
 const CreateAudio = () => {
+  const navigate = useNavigate();
   const [audioData, setAudioData] = useState({
-    title: '',
     artist: '',
     album: '',
     genre: '',
-    duration: '',
-    releaseDate: '',
-    audioUrl: '',
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [dragActive, setDragActive] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setAudioData((prevData) => ({
-      ...prevData,
+    setAudioData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === 'audio/wav') {
-      setSelectedFile(file);
-    } else {
-      setError('Veuillez sélectionner un fichier .wav');
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
     }
   };
 
-  const uploadFile = async (file) => {
-    // Ici, tu dois implémenter l'envoi du fichier vers ton serveur ou un stockage externe
-    // Pour cet exemple, on suppose que l'API retourne une URL après l'upload
-    const formData = new FormData();
-    formData.append('file', file);
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    setError('');
 
-    try {
-      const response = await audioApi.upload(formData); // Modifier selon ton API
-      return response.data.audioUrl; // Supposons que l'API retourne { audioUrl: "https://..." }
-    } catch (err) {
-      throw new Error("Erreur lors de l'upload du fichier");
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('audio/')) {
+      setSelectedFile(file);
+    } else {
+      setError('Le fichier doit être un fichier audio');
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('audio/')) {
+      setSelectedFile(file);
+      setError('');
+    } else {
+      setError('Le fichier doit être un fichier audio');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedFile) {
+      setError('Veuillez sélectionner un fichier audio');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      let audioUrl = audioData.audioUrl;
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('artist', audioData.artist);
+      formData.append('album', audioData.album);
+      formData.append('genre', audioData.genre);
 
-      if (selectedFile) {
-        audioUrl = await uploadFile(selectedFile);
+      if (typeof audioApi.create !== 'function') {
+        throw new Error("La fonction create n'existe pas dans audioApi");
       }
 
-      await audioApi.create({ ...audioData, audioUrl });
-      navigate('/audio');
+      const response = await audioApi.create(formData);
+
+      if (response.data) {
+        navigate('/audio');
+      }
     } catch (err) {
-      setError("Erreur lors de l'ajout de l'audio");
+      setError(
+        err.response?.data?.message ||
+          "Une erreur est survenue lors de la création de l'audio"
+      );
     } finally {
       setLoading(false);
     }
@@ -73,152 +99,97 @@ const CreateAudio = () => {
 
   return (
     <Layout>
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Ajouter un audio</h1>
-      </div>
+      <div className="bg-[#29282D] rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-white mb-6">
+          Ajouter un nouvel audio
+        </h1>
 
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <p className="text-red-500">{error}</p>}
-
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Titre
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={audioData.title}
-              onChange={handleChange}
-              required
-              className="input"
-            />
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
           </div>
+        )}
 
-          <div>
-            <label
-              htmlFor="artist"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Artiste
-            </label>
-            <input
-              type="text"
-              id="artist"
-              name="artist"
-              value={audioData.artist}
-              onChange={handleChange}
-              required
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="album"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Album
-            </label>
-            <input
-              type="text"
-              id="album"
-              name="album"
-              value={audioData.album}
-              onChange={handleChange}
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="genre"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Genre
-            </label>
-            <input
-              type="text"
-              id="genre"
-              name="genre"
-              value={audioData.genre}
-              onChange={handleChange}
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="duration"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Durée (en secondes)
-            </label>
-            <input
-              type="number"
-              id="duration"
-              name="duration"
-              value={audioData.duration}
-              onChange={handleChange}
-              required
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="releaseDate"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Date de sortie
-            </label>
-            <input
-              type="date"
-              id="releaseDate"
-              name="releaseDate"
-              value={audioData.releaseDate}
-              onChange={handleChange}
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="audioFile"
-              className="block text-sm font-semibold text-gray-400 mb-2"
-            >
-              Sélectionner un fichier audio (.wav)
-            </label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div
+            className={`border-2 border-dashed rounded-lg p-8 mb-4 text-center ${
+              dragActive
+                ? 'border-[#A238FF] bg-[#A238FF]/10'
+                : 'border-gray-600'
+            }`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+          >
             <input
               type="file"
-              id="audioFile"
-              name="audioFile"
-              accept=".wav"
-              onChange={handleFileChange}
-              required
-              className="input"
+              accept="audio/*"
+              className="hidden"
+              id="audio-file"
+              onChange={handleFileSelect}
             />
+            <label
+              htmlFor="audio-file"
+              className="cursor-pointer block text-gray-400"
+            >
+              {selectedFile ? (
+                <div className="text-white">
+                  <p className="text-[#A238FF]">
+                    Fichier sélectionné: {selectedFile.name}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-lg mb-2">
+                    Glissez et déposez votre fichier audio ici
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    ou cliquez pour sélectionner un fichier
+                  </p>
+                </div>
+              )}
+            </label>
           </div>
 
-          <div className="mt-4 flex justify-end gap-2">
-            <button
+          <InputField
+            id="artist"
+            name="artist"
+            label="Artiste"
+            value={audioData.artist}
+            onChange={handleChange}
+            required
+          />
+          <InputField
+            id="album"
+            name="album"
+            label="Album"
+            value={audioData.album}
+            onChange={handleChange}
+          />
+          <InputField
+            id="genre"
+            name="genre"
+            label="Genre"
+            value={audioData.genre}
+            onChange={handleChange}
+          />
+
+          <div className="flex justify-end gap-4 pt-6">
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => navigate('/audio')}
-              className="btn btn-secondary"
             >
               Annuler
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="btn btn-primary"
-              disabled={loading}
+              variant="primary"
+              disabled={loading || !selectedFile}
             >
-              {loading ? 'Chargement...' : 'Ajouter'}
-            </button>
+              {loading ? 'Création...' : "Créer l'audio"}
+            </Button>
           </div>
         </form>
       </div>

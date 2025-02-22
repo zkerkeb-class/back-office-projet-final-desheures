@@ -47,7 +47,12 @@ export const albumApi = {
 export const audioApi = {
   getAll: () => api.get('/audio'),
   getById: (id) => api.get(`/audio/${id}`),
-  create: (data) => api.post('/audio', data),
+  create: (data) =>
+    api.post('/audio', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
   update: (id, data) => api.put(`/audio/${id}`, data),
   delete: (id) => api.delete(`/audio/${id}`),
 };
