@@ -15,7 +15,6 @@ const UpdateArtist = () => {
   const { id } = useParams();
   const [formData, setFormData] = useState({
     name: '',
-    namePhonetic: '',
     genres: [],
     bio: '',
     imageUrl: '',
@@ -44,7 +43,6 @@ const UpdateArtist = () => {
         const artist = await response.json();
         setFormData({
           name: artist.name,
-          namePhonetic: artist.namePhonetic,
           genres: artist.genres,
           bio: artist.bio,
           imageUrl: artist.imageUrl,
@@ -133,14 +131,6 @@ const UpdateArtist = () => {
               value={formData.name}
               onChange={handleChange}
               required
-            />
-
-            <InputField
-              id="namePhonetic"
-              name="namePhonetic"
-              label="Nom phonétique"
-              value={formData.namePhonetic}
-              onChange={handleChange}
             />
           </div>
 

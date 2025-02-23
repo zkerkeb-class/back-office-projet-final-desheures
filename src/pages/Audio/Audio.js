@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { audioApi } from '../../services/api';
 import { filterService } from '../../services/filter';
 import SortBarAudio from '../../components/common/SortBar/SortBarAudio/SortBarAudio';
+import InputField from '../../components/common/InputField/InputField';
+import SelectField from '../../components/common/SelectField/SelectField'; // Nouveau composant SelectField
 
 const Audio = () => {
   const [audios, setAudios] = useState([]);
@@ -114,72 +116,66 @@ const Audio = () => {
         </Button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-4">
-        <div className="grid grid-cols-1 gap-4">
+      <div className="bg-white dark:bg-[#29282D] p-4 rounded-lg shadow mb-4">
+        <div className="grid grid-cols-1">
           <SearchBar
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input"
           />
-          <select
-            className="input"
+          <SelectField
+            id="album"
+            label="Album"
             value={filter.album}
             onChange={(e) => setFilter({ ...filter, album: e.target.value })}
-          >
-            <option value="">Album</option>
-            {[...new Set(audios.map((audio) => audio.album?.title))].map(
-              (album) =>
-                album && (
-                  <option key={album} value={album}>
-                    {album}
-                  </option>
-                )
-            )}
-          </select>
-          <select
-            className="input"
+            options={[
+              { value: '', label: 'Album' },
+              ...[...new Set(audios.map((audio) => audio.album?.title))].map(
+                (album) => ({ value: album, label: album })
+              ),
+            ]}
+          />
+          <SelectField
+            id="artist"
+            label="Artiste"
             value={filter.artist}
             onChange={(e) => setFilter({ ...filter, artist: e.target.value })}
-          >
-            <option value="">Artiste</option>
-            {[...new Set(audios.map((audio) => audio.artist?.name))].map(
-              (artist) =>
-                artist && (
-                  <option key={artist} value={artist}>
-                    {artist}
-                  </option>
-                )
-            )}
-          </select>
-          <select
-            className="input"
+            options={[
+              { value: '', label: 'Artiste' },
+              ...[...new Set(audios.map((audio) => audio.artist?.name))].map(
+                (artist) => ({ value: artist, label: artist })
+              ),
+            ]}
+          />
+          <SelectField
+            id="genre"
+            label="Genre"
             value={filter.genre}
             onChange={(e) => setFilter({ ...filter, genre: e.target.value })}
-          >
-            <option value="">Genre</option>
-            {genres.map((genre) => (
-              <option key={genre} value={genre}>
-                {genre}
-              </option>
-            ))}
-          </select>
-          <input
+            options={[
+              { value: '', label: 'Genre' },
+              ...genres.map((genre) => ({ value: genre, label: genre })),
+            ]}
+          />
+          <InputField
             type="number"
             className="input"
             placeholder="Année"
             value={filter.year}
             onChange={(e) => setFilter({ ...filter, year: e.target.value })}
           />
-          <select
-            className="input"
+          <SelectField
+            id="duration"
+            label="Durée"
             value={filter.duration}
             onChange={(e) => setFilter({ ...filter, duration: e.target.value })}
-          >
-            <option value="">Durée</option>
-            <option value="0-180">0-3 min</option>
-            <option value="181-300">3-5 min</option>
-            <option value="301+">5+ min</option>
-          </select>
+            options={[
+              { value: '', label: 'Durée' },
+              { value: '0-180', label: '0-3 min' },
+              { value: '181-300', label: '3-5 min' },
+              { value: '301+', label: '5+ min' },
+            ]}
+          />
         </div>
         <div className="mt-4 flex justify-between items-center gap-2">
           <div className="flex gap-2">
