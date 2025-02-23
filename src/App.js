@@ -1,9 +1,25 @@
-function App() {
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
+import { TokenProvider } from './context/TokenContext';
+import ErrorBoundary from './components/common/ErrorBoundary/ErrorBoundary';
+import AppRoutes from './routes';
+
+const App = () => {
   return (
-    <div className="bg-blue-500 text-white p-4">
-      <h1 className="text-3xl font-bold">Hello Tailwind CSS!</h1>
-    </div>
-  )
-}
+    <ErrorBoundary>
+      <BrowserRouter>
+        <TokenProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
+          </ThemeProvider>
+        </TokenProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

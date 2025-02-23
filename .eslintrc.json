@@ -20,14 +20,18 @@
     "react/prop-types": "off",
     "no-console": "warn",
     "object-curly-spacing": ["error", "always"], // Exige un espace dans les objets {}
-      "comma-dangle": ["error", "never"],          // Interdit les virgules finales dans les objets/arrays
-      "indent": ["error", 2],                      // Indentation avec 2 espaces
-      "no-trailing-spaces": "error",               // Interdit les espaces inutiles en fin de ligne
-      "space-before-blocks": ["error", "always"],  // Exige un espace avant les blocs de code
-      "keyword-spacing": ["error", {              // Exige un espace autour des mots-clés
+    "comma-dangle": ["error", "never"], // Interdit les virgules finales dans les objets/arrays
+    "indent": ["error", 2], // Indentation avec 2 espaces
+    "no-trailing-spaces": "error", // Interdit les espaces inutiles en fin de ligne
+    "space-before-blocks": ["error", "always"], // Exige un espace avant les blocs de code
+    "keyword-spacing": [
+      "error",
+      {
+        // Exige un espace autour des mots-clés
         "before": true,
         "after": true
-      }]
+      }
+    ]
   },
   "settings": {
     "react": {
