@@ -14,7 +14,6 @@ const Header = () => {
     { name: 'Artistes', path: '/artists' },
     { name: 'Albums', path: '/albums' },
     { name: 'Audio', path: '/audio' },
-    { name: 'Paramètres', path: '/settings' },
   ];
 
   const isActivePath = (path) => {

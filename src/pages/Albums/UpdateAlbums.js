@@ -1,48 +1,60 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-console */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable comma-dangle */
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import Layout from '../../components/layout/Layout/Layout';
-import Button from '../../components/common/Button/Button';
+import { useParams, Link, data } from 'react-router-dom';
 import { albumApi } from '../../services/api';
 import { audioApi } from '../../services/api';
 import { artistApi } from '../../services/api';
+import Layout from '../../components/layout/Layout/Layout';
+import Button from '../../components/common/Button/Button';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import PopUp from '../../components/common/Popup/Popup';
 
-const UpdateAlbums = () => {
-  const { id } = useParams(); // Récupère l'ID de l'album depuis les paramètres de l'URL
-  const [album, setAlbum] = useState(null); // État pour stocker l'album à modifier
-  const [availableTracks, setAvailableTracks] = useState([]); // État pour stocker les pistes disponibles
-  const [availableArtists, setAvailableArtists] = useState([]); // État pour stocker les artistes disponibles
-  const [loading, setLoading] = useState(true); // État pour gérer le chargement
-  const [error, setError] = useState(''); // État pour gérer les erreurs
-  const [isUpdating, setIsUpdating] = useState(false); // État pour vérifier si une mise à jour est en cours
+const UpdateAlbums = (onDelete) => {
+  const { id } = useParams();
+  const [album, setAlbum] = useState(null);
+  const [availableTracks, setAvailableTracks] = useState([]);
+  const [availableArtists, setAvailableArtists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [formData, setFormData] = useState({
-    // État pour les données du formulaire
     title: '',
-    releaseDate: '',
     artist: '',
+    tracks: [],
   });
-  const [searchQuery, setSearchQuery] = useState(''); // État pour gérer la recherche de pistes
-  const [filteredTracks, setFilteredTracks] = useState([]); // État pour les pistes filtrées en fonction de la recherche
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredTracks, setFilteredTracks] = useState([]);
 
-  // Hook pour charger les données de l'album, les pistes et les artistes
   useEffect(() => {
     const fetchAlbum = async () => {
       try {
-        // Récupère l'album à partir de l'API
         const albumResponse = await albumApi.getById(id);
-        setAlbum(albumResponse.data);
+        const tracksWithDetails = await Promise.all(
+          albumResponse.data.tracks.map(async (track) => {
+            const trackResponse = await audioApi.getById(track._id);
+            return trackResponse.data;
+          })
+        );
+
+        const albumWithTracks = {
+          ...albumResponse.data,
+          tracks: tracksWithDetails,
+        };
+
+        setAlbum(albumWithTracks);
         setFormData({
           title: albumResponse.data.title,
           releaseDate: new Date(albumResponse.data.releaseDate).getFullYear(),
           artist: albumResponse.data.artist?._id || '',
         });
 
-        // Récupère les pistes disponibles
         const tracksResponse = await audioApi.getAll();
         setAvailableTracks(tracksResponse.data);
 
-        // Récupère les artistes disponibles
         const artistsResponse = await artistApi.getAll();
         setAvailableArtists(artistsResponse.data);
       } catch (err) {
@@ -57,7 +69,6 @@ const UpdateAlbums = () => {
     fetchAlbum();
   }, [id]);
 
-  // Hook pour filtrer les pistes en fonction de la recherche
   useEffect(() => {
     if (searchQuery) {
       const results = availableTracks.filter((track) =>
@@ -69,7 +80,6 @@ const UpdateAlbums = () => {
     }
   }, [searchQuery, availableTracks]);
 
-  // Fonction pour gérer le changement des champs du formulaire
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -78,15 +88,47 @@ const UpdateAlbums = () => {
     }));
   };
 
-  // Fonction pour ajouter une piste à l'album
-  const handleAddTrack = async (trackId) => {
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    const items = album.tracks;
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
     setIsUpdating(true);
     try {
       const updatedAlbum = {
         ...album,
-        tracks: [...album.tracks, { _id: trackId }],
+        tracks: items.map((track) => ({
+          _id: track._id,
+        })),
       };
-      await albumApi.update(id, updatedAlbum);
+      setAlbum({
+        ...album,
+        tracks: items,
+      });
+      setFormData({
+        ...album,
+        tracks: items,
+      });
+    } catch (err) {
+      setError('Erreur lors de la réorganisation des musiques');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleAddTrack = async (trackId) => {
+    setIsUpdating(true);
+    try {
+      const trackResponse = await audioApi.getById(trackId);
+      const trackDetails = trackResponse.data;
+
+      const updatedAlbum = {
+        ...album,
+        tracks: [...album.tracks, { _id: trackDetails._id }],
+      };
+      setFormData(updatedAlbum);
       setAlbum(updatedAlbum);
     } catch (err) {
       setError("Erreur lors de l'ajout de la musique");
@@ -95,7 +137,6 @@ const UpdateAlbums = () => {
     }
   };
 
-  // Fonction pour supprimer une piste de l'album
   const handleRemoveTrack = async (trackId) => {
     setIsUpdating(true);
     try {
@@ -103,16 +144,16 @@ const UpdateAlbums = () => {
         ...album,
         tracks: album.tracks.filter((track) => track._id !== trackId),
       };
-      await albumApi.update(id, updatedAlbum);
       setAlbum(updatedAlbum);
+      setFormData(updatedAlbum);
     } catch (err) {
       setError('Erreur lors de la suppression de la musique');
     } finally {
       setIsUpdating(false);
+      setShowDeletePopup(false);
     }
   };
 
-  // Fonction pour gérer la soumission du formulaire (mise à jour de l'album)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUpdating(true);
@@ -120,11 +161,11 @@ const UpdateAlbums = () => {
       const updatedAlbum = {
         ...album,
         title: formData.title,
-        releaseDate: new Date(formData.releaseDate).getFullYear(),
-        artist: formData.artist,
+        artist: album.artist._id,
+        tracks: formData.tracks.map((track) => track._id),
       };
-      await albumApi.update(id, updatedAlbum);
-      setAlbum(updatedAlbum);
+      const newAlbumdata = await albumApi.update(id, updatedAlbum);
+      setAlbum(newAlbumdata.data);
     } catch (err) {
       setError("Erreur lors de la mise à jour de l'album");
     } finally {
@@ -132,14 +173,21 @@ const UpdateAlbums = () => {
     }
   };
 
-  // Gère l'état de chargement et d'erreur
+  const handleDeleteClick = () => {
+    setShowDeletePopup(true);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeletePopup(false);
+  };
+
   if (loading) return <p>Chargement...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
   if (!album) return <p>Aucun album trouvé.</p>;
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+      <div className="max-w-3xl mx-auto bg-white dark:bg-[#29282D] p-6 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold mb-4 text-white">Modifier l'album</h1>
 
         <form onSubmit={handleSubmit}>
@@ -163,47 +211,20 @@ const UpdateAlbums = () => {
 
           <div className="mb-4">
             <label
-              htmlFor="releaseDate"
-              className="block text-sm font-medium text-gray-400 mb-2"
-            >
-              Année de sortie
-            </label>
-            <input
-              type="number"
-              id="releaseDate"
-              name="releaseDate"
-              value={formData.releaseDate}
-              onChange={handleChange}
-              className="w-full p-3 bg-[#1F1F23] text-white rounded-md focus:ring-2 focus:ring-[#A238FF] focus:outline-none"
-              required
-              min="1900"
-              max={new Date().getFullYear()}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
               htmlFor="artist"
               className="block text-sm font-medium text-gray-400 mb-2"
             >
               Artiste
             </label>
             <div className="flex gap-2 items-center">
-              <select
+              <div
                 id="artist"
                 name="artist"
-                value={formData.artist}
-                onChange={handleChange}
                 className="w-full p-3 bg-[#1F1F23] text-white rounded-md focus:ring-2 focus:ring-[#A238FF] focus:outline-none"
-                required
               >
-                <option value="">Sélectionner un artiste</option>
-                {availableArtists.map((artist) => (
-                  <option key={artist._id} value={artist._id}>
-                    {artist.name}
-                  </option>
-                ))}
-              </select>
+                {album.artist.name}
+              </div>
+
               {formData.artist && (
                 <Link
                   to={`/artist/update/${formData.artist}`}
@@ -226,40 +247,87 @@ const UpdateAlbums = () => {
             Liste des musiques :
           </h2>
           {album.tracks && album.tracks.length > 0 ? (
-            <ul className="list-disc list-inside text-gray-700 dark:text-gray-300">
-              {album.tracks.map((track, index) => (
-                <li
-                  key={track._id}
-                  className="mb-1 flex justify-between items-center"
-                >
-                  <span>
-                    {index + 1}. {track.title}
-                  </span>
-                  <div className="flex gap-2 items-center">
-                    <Link
-                      to={`/audio/update/${track._id}`}
-                      className="text-[#A238FF] hover:text-[#8429DB] p-2"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="tracks" type="TRACK">
+                {(provided) => (
+                  <ul
+                    className="list-none text-gray-700 dark:text-gray-300"
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                  >
+                    {album.tracks.map((track, index) => (
+                      <Draggable
+                        key={track._id}
+                        draggableId={track._id.toString()}
+                        index={index}
                       >
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
-                    </Link>
-                    <Button
-                      variant="danger"
-                      onClick={() => handleRemoveTrack(track._id)}
-                      disabled={isUpdating}
-                    >
-                      Supprimer
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                        {(provided, snapshot) => (
+                          <li
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`mb-1 flex justify-between items-center p-3 rounded-md ${
+                              snapshot.isDragging
+                                ? 'bg-[#2F2F33]'
+                                : 'bg-[#1F1F23]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4 6h16M4 12h16M4 18h16"
+                                />
+                              </svg>
+                              <span>
+                                {index + 1}. {track.title}
+                              </span>
+                            </div>
+                            <div className="flex gap-2 items-center">
+                              <Link
+                                to={`/audio/update/${track._id}`}
+                                className="text-[#A238FF] hover:text-[#8429DB] p-2"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-5 w-5"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                              </Link>
+                              <Button
+                                variant="danger"
+                                onClick={() => handleDeleteClick()}
+                                disabled={isUpdating}
+                              >
+                                Supprimer
+                              </Button>
+                              <PopUp
+                                isOpen={showDeletePopup}
+                                message={`Êtes-vous sûr de vouloir supprimer l'audio" ?`}
+                                onConfirm={() => handleRemoveTrack(track._id)}
+                                onCancel={handleCancelDelete}
+                              />
+                            </div>
+                          </li>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </ul>
+                )}
+              </Droppable>
+            </DragDropContext>
           ) : (
             <p className="text-gray-500">Aucune musique trouvée.</p>
           )}
